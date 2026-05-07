@@ -6,7 +6,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://shopnosr:rushowsr@ac-thnjtsb-shard-00-00.zh9k44f.mongodb.net:27017,ac-thnjtsb-shard-00-01.zh9k44f.mongodb.net:27017,ac-thnjtsb-shard-00-02.zh9k44f.mongodb.net:27017/businessDB?ssl=true&replicaSet=atlas-yhgw3e-shard-0&authSource=admin")
+mongoose.connect(
+  "mongodb://shopnosr:rushowsr@ac-thnjtsb-shard-00-00.zh9k44f.mongodb.net:27017,ac-thnjtsb-shard-00-01.zh9k44f.mongodb.net:27017,ac-thnjtsb-shard-00-02.zh9k44f.mongodb.net:27017/businessdb?ssl=true&replicaSet=atlas-yhgw3e-shard-0&authSource=admin"
+)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));
 
