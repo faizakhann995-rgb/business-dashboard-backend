@@ -34,26 +34,54 @@ app.post("/clients", async (req, res) =>{
     res.json(await Client.find());
 })
 
+// Put
+app.put("/clients/:id", async (req, res) =>{
+  try{
+    const updatedClient = await Client.findByIdAndUpdate(req.params.id, req.body, {new :true});
+    res.json(updatedClient);
+  
+  }
+  catch(err){
+    console.log("UPDATE ERROR:", err)
+    res.status(500).json({
+      error: err.message
+    })
+  }
+})
+
 // Delete
 app.delete("/clients/:id", async (req, res) => {
   try {
-    console.log("DELETE ID:", req.params.id);
+    const id = req.params.id;
 
-    const deleted = await Client.findByIdAndDelete(req.params.id);
+    console.log("DELETE REQUEST:", id);
 
-    if (!deleted) {
-      return res.status(404).json({ message: "Not found" });
+    const existing = await Client.findById(id);
+
+    console.log("FOUND CLIENT:", existing);
+
+    if (!existing) {
+      return res.status(404).json({
+        message: "Client not found",
+      });
     }
 
-    const data = await Client.find();
-    res.json(data);
+    await Client.findByIdAndDelete(id);
+
+    console.log("DELETE SUCCESS");
+
+    const updated = await Client.find();
+
+    res.json(updated);
 
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Delete failed" });
+    console.log("DELETE ERROR:", err);
+
+    res.status(500).json({
+      error: err.message,
+    });
   }
 });
-
 app.listen(PORT, () =>{
     console.log(`Server is running on port ${PORT}`);
 })
