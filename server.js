@@ -49,10 +49,14 @@ const clientSchema = new mongoose.Schema(
     name: String,
     email: String,
     status: String,
+
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
-
 const Client = mongoose.model("Client", clientSchema);
 
 // ======================
@@ -148,7 +152,10 @@ const verifyToken = (req, res, next) => {
 // GET ALL CLIENTS
 app.get("/clients", verifyToken, async (req, res) => {
   try {
-    const data = await Client.find();
+    const data = await Client.find({
+      userId: req.user.id,
+    });
+
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -158,10 +165,17 @@ app.get("/clients", verifyToken, async (req, res) => {
 // CREATE CLIENT
 app.post("/clients", verifyToken, async (req, res) => {
   try {
-    const newClient = new Client(req.body);
+    const newClient = new Client({
+      ...req.body,
+      userId: req.user.id,
+    });
+
     await newClient.save();
 
-    const data = await Client.find();
+    const data = await Client.find({
+      userId: req.user.id,
+    });
+
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -171,11 +185,14 @@ app.post("/clients", verifyToken, async (req, res) => {
 // UPDATE CLIENT
 app.put("/clients/:id", verifyToken, async (req, res) => {
   try {
-    const updated = await Client.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updated = await Client.findOneAndUpdate(
+  {
+    _id: req.params.id,
+    userId: req.user.id,
+  },
+  req.body,
+  { new: true }
+);
 
     if (!updated) {
       return res.status(404).json({ message: "Client not found" });
@@ -190,13 +207,21 @@ app.put("/clients/:id", verifyToken, async (req, res) => {
 // DELETE CLIENT
 app.delete("/clients/:id", verifyToken, async (req, res) => {
   try {
-    const deleted = await Client.findByIdAndDelete(req.params.id);
+    const deleted = await Client.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
 
     if (!deleted) {
-      return res.status(404).json({ message: "Client not found" });
+      return res
+        .status(404)
+        .json({ message: "Client not found" });
     }
 
-    const data = await Client.find();
+    const data = await Client.find({
+      userId: req.user.id,
+    });
+
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
